@@ -253,7 +253,7 @@ class LineMatcher:
             self._dict[s[0]] = lev
     def match(self, line):
         try:
-            m = self._re.search(line)
+            m = self._re.search(line.decode('utf8'))
             if m:
                 lev = self.level[m.group(1)]
                 if m.group(2) in self._dict:
@@ -307,9 +307,9 @@ class Monitor(object):
         self.exit_key = CTRL_RBRACKET
 
         self.translate_eol = {
-            "CRLF": lambda c: c.replace(b"\n", b"\r\n"),
-            "CR":   lambda c: c.replace(b"\n", b"\r"),
-            "LF":   lambda c: c.replace(b"\r", b"\n"),
+            "CRLF": lambda c: c.replace("\n", "\r\n"),
+            "CR":   lambda c: c.replace("\n", "\r"),
+            "LF":   lambda c: c.replace("\r", "\n"),
         }[eol]
 
         # internal state
@@ -420,7 +420,7 @@ class Monitor(object):
     def handle_possible_pc_address_in_line(self, line):
         line = self._pc_address_buffer + line
         self._pc_address_buffer = b""
-        for m in re.finditer(MATCH_PCADDR, line):
+        for m in re.finditer(MATCH_PCADDR, line.decode(encoding='utf8', errors='replace')):
             self.lookup_pc_address(m.group())
 
     def handle_menu_key(self, c):
@@ -532,7 +532,7 @@ class Monitor(object):
         try:
             translation = subprocess.check_output(cmd, cwd=".")
             if b"?? ??:0" not in translation:
-                yellow_print(translation.decode())
+                yellow_print(translation.decode(encoding='utf8', errors='replace'))
         except OSError as e:
             red_print("%s: %s" % (" ".join(cmd), e))
 
